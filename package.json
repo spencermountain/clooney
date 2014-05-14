@@ -1,0 +1,21 @@
+{
+    "author": "Spencer Kelly <spencerwater@gmail.com> (http://spencermounta.in)",
+    "name": "clooney",
+    "description": "a graphing library for the famo.us engine",
+    "version": "0.0.1",
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/spencermountain/clooney.git"
+    },
+    "main": "index.js",
+    "engines": [
+        "node >= 0.3.6"
+    ],
+    "dependencies": {},
+    "devDependencies": {
+        "grunt": "0.4.2",
+        "grunt-contrib-jshint": "*",
+        "grunt-contrib-concat": "*",
+        "grunt-contrib-uglify": "*"
+    }
+}
