@@ -13,30 +13,34 @@ here are some demos:
 
 ## Use
 ```javascript
-		data= [{
-			  value:30,
-			  label:"Rivest"
-			},
-			{
-			  value:40,
-			  label:"Shamir"
-			},
-			{
-			  value:60,
-			  label:"Adleman"
-		  }]
-		graph = new Clooney({
-			data: data,
-			width: 400,
-			height: 400,
-			type: "horizontal_bar"
-		})
-		view = graph.build()
-		mainContext.add(view)
+//a generic data format for all graphs
+data= [{
+	  value:30,
+	  label:"Rivest"
+	},
+	{
+	  value:40,
+	  label:"Shamir"
+	},
+	{
+	  value:60,
+	  label:"Adleman"
+  }]
+//a generic options format
+graph = new Clooney({
+	data: data,
+	width: 400,
+	height: 400,
+	type: "horizontal_bar"
+})
+//get the famo.us container
+view = graph.build()
+mainContext.add(view)
 
-		//then to update it..
-		g.update({
-			align:"middle",
-			type:"vertical_bar"
-		})
+//then update it..
+g.update({
+	align:"middle",
+	type:"vertical_bar"
+})
+//the updates automatically animate in a physics transition
 ```
