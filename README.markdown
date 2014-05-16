@@ -1,16 +1,15 @@
 
-##clooney makes nice graphs with the [famo.us](http://famo.us) layout engine
+##clooney makes graphs with [famo.us](http://famo.us)
 
-it borrows loads of layout logic from [d3.js](http://d3js.org)
+Clooney builds graphs using tons of layout logic from [d3.js](http://d3js.org), and renders them with the [famo.us](http://famo.us) layout engine.
 
-it's in early development. -- here are some demos:
+here are some demos:
 
-[barchart](https://rawgit.com/spencermountain/famo.us_scratch/master/graphs/index.html)
+* [barchart](https://rawgit.com/spencermountain/famo.us_scratch/master/graphs/index.html)
+* [linechart](https://rawgit.com/spencermountain/famo.us_scratch/master/areabar/index.html)
+* [treemap](https://rawgit.com/spencermountain/famo.us_scratch/master/treemap/index.html)
 
-[linechart](https://rawgit.com/spencermountain/famo.us_scratch/master/areabar/index.html)
-
-[treemap](https://rawgit.com/spencermountain/famo.us_scratch/master/treemap/index.html)
-
+it's in early development. (May 2014)
 
 ## Use
 ```javascript
@@ -49,15 +48,50 @@ g.update({
 g.hide()
 ```
 
-## Full docs
-used to feed g.update() and new Clooney()
+## Set things up
 ```javascript
 options= {
-	data:[], //objects with a number as 'value'. change any value and it updates intellegently
-	width:400,//graph container width (and x-axis scale size)
-	height:400,//graph container height (and y-axis scale size)
+	data:[] //objects with a number as 'value'. change any value and it updates intellegently
+	width:400//graph container width (and x-axis scale size)
+	height:400//graph container height (and y-axis scale size)
 	align:"start|middle|end" //start=left for horizontal charts, start=bottom for vertical charts
-	type:"horizontal_bar|vertical_bar|horizontal_area" //
+	type:"horizontal_bar|vertical_bar|horizontal_area" //the type of chart
+	hidden: true|false //lets you control when it opens/closes
 }
+```
 
+#Utility methods
+they just wrap around 'g.update()', if you wanna use them
+```javascript
+g= new Clooney()
+
+//show/hide the data
+g.hide()
+g.show()
+//container size
+g.resize({width:500})
+g.resize({height:0})
+//options.align
+g.align('start')
+g.align('middle')
+g.align('end')
+//ordering
+g.sort()
+g.sort(my_sort_method)
+g.sort('desc')
+g.randomize()//re-arrange randomly
+
+//sugar
+g.wave()//wiggle each value in a sequence
+g.random_walk()//mindlessly guide things out of order
+```
+
+#Direct manipulation
+if you're a badass, you can manipulate the graph manually, aswell.
+```javascript
+
+g.bars[1].focus()
+
+g.bars[1].height=800
+g.bars[1].draw()
 ```

@@ -32,6 +32,11 @@ define (require, exports, module)->
     period: 450,
     dampingRatio: 0.7
   };
+  sort_transition = {
+    method: 'wall',
+    period: 750,
+    dampingRatio: 0.8
+  };
 
    #method to draw individual bars
   class Bar
@@ -39,16 +44,14 @@ define (require, exports, module)->
       @d= options.d || {value:0, label:""}
       @i= options.i
       @graph= options.graph
-      @x=Math.random()*100
-      @y=Math.random()*100
       @compute()
       s = new Surface(
         size: [undefined, undefined]
         content:@d.value||''
         properties:
-          backgroundColor: "steelblue"
-          border: "0.5px solid white"
-          textAlign: "left"
+          backgroundColor: @d.color || "steelblue"
+          overflow:"hidden",
+          textAlign: "right"
           color: "white"
           "font-size": "10px"
       )
@@ -61,7 +64,7 @@ define (require, exports, module)->
       @graph.node.add(@mod).add(s)
       @mod.setSize [@w, @h], wall_transition
 
-    compute:->
+    compute:()->
       the= this
       if @graph.type=="vertical_bar"
         @y= 0
@@ -73,6 +76,8 @@ define (require, exports, module)->
           @origin=[0,0.5]
         if @graph.align=="end"
           @origin=[0,0]
+        if @graph.hidden
+          @h=0.1
 
       else if @graph.type=="horizontal_bar"
         @x= 0
@@ -84,13 +89,22 @@ define (require, exports, module)->
           @origin=[0.5,1]
         if @graph.align=="end"
           @origin=[1,1]
-      console.log @h
+        if @graph.hidden
+          @w=0.1
 
-    show: ->
+    draw: (transition=wall_transition, cb=->)->
       the= this
-      the.mod.setOrigin(the.origin, wall_transition)
-      the.mod.setTransform(Transform.translate(the.x, the.y), wall_transition)
-      the.mod.setSize([the.w, the.h], wall_transition)
+      the.mod.setOrigin(the.origin, transition)
+      the.mod.setTransform(Transform.translate(the.x, the.y), transition)
+      the.mod.setSize([the.w, the.h], transition, cb)
+
+    focus:()->
+      @mod.setOpacity(1.0)
+
+    sort_to:(i, transition=sort_transition, cb=->)->
+      @i=i
+      @compute()
+      @draw(transition, cb)
 
 
 
@@ -99,10 +113,11 @@ define (require, exports, module)->
     constructor:(options={})->
       @data = options.data || []
       @width = options.width || 400
-      @align= options.align || "start"
       @height = options.height || 400
       @bars=[]
+      @align= options.align || "start"
       @type= options.type || "vertical_bar"
+      @hidden= (options.hidden!=null && options.hidden==true)
       @compute()
       @node= new ContainerSurface({
         size:[@width, @height],
@@ -118,16 +133,27 @@ define (require, exports, module)->
            d:d,
            i:i
           })
-      @show()
+      @draw()
 
-    update:(options)->
+    update:(options={})->
+      options.transition= options.transition || wall_transition
+      #do container resizes beforehand
+      if options.width || options.height
+        if options.width!=undefined
+          @width= options.width
+        if options.height != undefined
+          @height= options.height
+        @node.setSize([@width, @height])#should animate this maybe
+      if options.hidden==null
+        options.hidden= false
       @data= options.data || @data
       @width = options.width || @width
       @height = options.height || @height
       @align = options.align || @align
       @type= options.type || @type
+      @hidden= options.hidden
       @compute()
-      @show()
+      @draw(options.transition)
 
     compute: ->
       the= this
@@ -150,18 +176,82 @@ define (require, exports, module)->
           })
         the.y_scale= new Scale({
           size:[0, the.height],
-          range:[0, the.data.length],
+          range:[0, the.bars.length],
           })
       @bars.forEach (bar,i)->
         bar.d= the.data[i]
-        bar.compute()
+        bar.compute(i)
 
 
     build:->
       return @node
+    draw:->
+      @bars.forEach (bar,i)->
+        Timer.after(-> #stagger the animation
+          bar.draw()
+        , i)
+
+    put:(obj={})->
+      the= this
+      b= new Bar(({graph:g, i:the.bars.length, d:obj}))
+      @data.push(obj)
+      @bars.push(b)
+      @compute()
+      @update()
     show:->
-      @bars.forEach (bar)->
-        bar.show()
+      @update({hidden:false})
+    hide:->
+      @update({hidden:true})
+    resize:(obj={})->
+      @update(obj)
+    align:(l="start")->
+      l= "start" if l=="left"
+      l= "end" if l=="right"
+      l= "middle" if l=="center"
+      l= "end" if l=="top"
+      l= "start" if l=="bottom"
+      @update({align:true})
 
+    update_order:->
+      @bars.forEach (b, l) ->
+        Timer.after(-> #stagger the animation
+          b.sort_to(l)
+        , l*1.5)
 
+    sort:(fn)->
+      if !fn || typeof fn=="string"
+        fn= (a, b) ->
+          b.d.value - a.d.value
+      @bars = @bars.sort(fn)
+      if fn=="desc"
+        @bars= @bars.reverse()
+      @update_order()
+
+    randomize:()->
+      @sort(->Math.random())
+
+    random_walk:()->
+      the= this
+      @bars.forEach (bar,l) ->
+        duration= Math.random()*25000+10000
+        transition= {duration:duration}
+        spot= Math.random()*the.bars.length
+        bar.sort_to(spot, transition, ->
+          console.log l
+          bar.sort_to(l, transition)
+          )
+
+    wave:(amount=1.1)->
+      transition= {duration:200}
+      @bars.forEach (bar,l) ->
+        bar.d.value= bar.d.value*amount
+        bar.compute()
+        Timer.after(-> #stagger the animation
+          bar.draw(transition)
+          bar.d.value= bar.d.value/amount
+          bar.compute()
+          bar.draw(transition)
+        , l*0.8)
+
+  window.Bar= Bar
   module.exports = Graph;

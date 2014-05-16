@@ -12,18 +12,41 @@
 		var mainContext = Engine.createContext();
 
 		random_data = function() {
+			var animals = [
+				"toronto",
+				"buffalo",
+				"hamilton",
+				"edmonton",
+				"miami",
+				"chicago",
+				"detroit",
+				"paris",
+				"london",
+				"kingston",
+				"peterburough",
+			]
+			var adjectives = [
+				"quiet",
+				"happy",
+				"almost",
+				"waiting",
+				"plenty",
+				"dogged",
+			]
 			var arr, i, length;
 			arr = [];
 			length = (Math.random() * 35) + 15;
 			i = 0;
 			while (i < length) {
+				var label = adjectives[parseInt(Math.random() * adjectives.length)]
+				label += " " + animals[parseInt(Math.random() * animals.length)]
 				arr.push({
 					value: parseInt(Math.random() * 100) + 1,
-					label: ""
+					label: label
 				});
 				i++;
 			}
-			return arr;
+			return arr
 		};
 
 
@@ -34,19 +57,33 @@
 			width: 400,
 			height: 400,
 			align: "start",
-			// type: "vertical_bar"
-			type: "horizontal_bar"
+			type: "vertical_bar",
+			// type: "horizontal_bar",
+			hidden: false
 		})
 		console.log(g)
 		view = g.build()
+		// g.random_walk()
 
 
-		Timer.after(function() {
-			g.update({
-				type: "vertical_bar"
-			})
-		}, 80)
-
+		// Timer.after(function() {
+		// console.log('hi')
+		// g.put({
+		// value: Math.random() * 95,
+		// label: "fun"
+		// })
+		// 	g.resize({
+		// 		width: 600,
+		// 		height: 600,
+		// 	})
+		// g.wave()
+		// g.random_walk()
+		// }, 50)
+		// Timer.after(function() {
+		// g.sort(function(a, b) {
+		// 	return Math.random()
+		// })
+		// }, 80)
 		// Timer.after(function() {
 		// 	g.update({
 		// 		align: "middle"
