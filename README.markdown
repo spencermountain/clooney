@@ -26,21 +26,33 @@ data= [{
 	  value:60,
 	  label:"Adleman"
   }]
-//a generic options format
+//compute the graph
 graph = new Clooney({
 	data: data,
 	width: 400,
 	height: 400,
 	type: "horizontal_bar"
 })
-//get the famo.us container
-view = graph.build()
+
+view = graph.build() //grab the famo.us container
 mainContext.add(view)
 
-//then update it..
+//then to update it..
 g.update({
 	align:"middle",
 	type:"vertical_bar"
 })
 //the updates automatically animate in a physics transition
+```
+
+## Full docs
+```javascript
+options= {
+	data:[], //objects with a number as 'value'. change any value and it updates intellegently
+	width:400,//graph container width (and x-axis scale size)
+	height:400,//graph container height (and y-axis scale size)
+	align:"start" //start|middle|end  (start=left for horizontal_bar, etc)
+	type:"horizontal_bar" // horizontal_bar|vertical_bar|horizontal_area
+}
+
 ```
