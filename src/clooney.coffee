@@ -48,12 +48,12 @@ define (require, exports, module)->
         properties:
           backgroundColor: "steelblue"
           border: "0.5px solid white"
-          textAlign: "center"
+          textAlign: "left"
           color: "white"
           "font-size": "10px"
       )
       @mod = new Modifier(
-        origin: [0, 1]
+        origin: @origin
         transform: Transform.translate(@x, @y)
         size: [0.1, 0.1]
         opacity: 0.8
@@ -68,18 +68,29 @@ define (require, exports, module)->
         @h= @graph.y_scale.linear(the.d.value)
         @x= @graph.x_scale.linear(the.i)
         @w= @graph.x_scale.linear(1) - 1
+        @origin=[0,1]
+        if @graph.align=="middle"
+          @origin=[0,0.5]
+        if @graph.align=="end"
+          @origin=[0,0]
+
       else if @graph.type=="horizontal_bar"
         @x= 0
         @y= -@graph.y_scale.linear(the.i)
         @h= @graph.y_scale.linear(1) - 1
         @w= @graph.x_scale.linear(the.d.value)
+        @origin=[0,1]
+        if @graph.align=="middle"
+          @origin=[0.5,1]
+        if @graph.align=="end"
+          @origin=[1,1]
       console.log @h
 
     show: ->
       the= this
-      the.mod.setSize([the.w, the.h], wall_transition)
+      the.mod.setOrigin(the.origin, wall_transition)
       the.mod.setTransform(Transform.translate(the.x, the.y), wall_transition)
-
+      the.mod.setSize([the.w, the.h], wall_transition)
 
 
 
@@ -88,6 +99,7 @@ define (require, exports, module)->
     constructor:(options={})->
       @data = options.data || []
       @width = options.width || 400
+      @align= options.align || "start"
       @height = options.height || 400
       @bars=[]
       @type= options.type || "vertical_bar"
@@ -112,6 +124,7 @@ define (require, exports, module)->
       @data= options.data || @data
       @width = options.width || @width
       @height = options.height || @height
+      @align = options.align || @align
       @type= options.type || @type
       @compute()
       @show()

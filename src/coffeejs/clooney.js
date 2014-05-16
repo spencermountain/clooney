@@ -55,13 +55,13 @@ define(function(require, exports, module) {
         properties: {
           backgroundColor: "steelblue",
           border: "0.5px solid white",
-          textAlign: "center",
+          textAlign: "left",
           color: "white",
           "font-size": "10px"
         }
       });
       this.mod = new Modifier({
-        origin: [0, 1],
+        origin: this.origin,
         transform: Transform.translate(this.x, this.y),
         size: [0.1, 0.1],
         opacity: 0.8
@@ -78,11 +78,25 @@ define(function(require, exports, module) {
         this.h = this.graph.y_scale.linear(the.d.value);
         this.x = this.graph.x_scale.linear(the.i);
         this.w = this.graph.x_scale.linear(1) - 1;
+        this.origin = [0, 1];
+        if (this.graph.align === "middle") {
+          this.origin = [0, 0.5];
+        }
+        if (this.graph.align === "end") {
+          this.origin = [0, 0];
+        }
       } else if (this.graph.type === "horizontal_bar") {
         this.x = 0;
         this.y = -this.graph.y_scale.linear(the.i);
         this.h = this.graph.y_scale.linear(1) - 1;
         this.w = this.graph.x_scale.linear(the.d.value);
+        this.origin = [0, 1];
+        if (this.graph.align === "middle") {
+          this.origin = [0.5, 1];
+        }
+        if (this.graph.align === "end") {
+          this.origin = [1, 1];
+        }
       }
       return console.log(this.h);
     };
@@ -90,8 +104,9 @@ define(function(require, exports, module) {
     Bar.prototype.show = function() {
       var the;
       the = this;
-      the.mod.setSize([the.w, the.h], wall_transition);
-      return the.mod.setTransform(Transform.translate(the.x, the.y), wall_transition);
+      the.mod.setOrigin(the.origin, wall_transition);
+      the.mod.setTransform(Transform.translate(the.x, the.y), wall_transition);
+      return the.mod.setSize([the.w, the.h], wall_transition);
     };
 
     return Bar;
@@ -108,6 +123,7 @@ define(function(require, exports, module) {
       }
       this.data = options.data || [];
       this.width = options.width || 400;
+      this.align = options.align || "start";
       this.height = options.height || 400;
       this.bars = [];
       this.type = options.type || "vertical_bar";
@@ -134,6 +150,7 @@ define(function(require, exports, module) {
       this.data = options.data || this.data;
       this.width = options.width || this.width;
       this.height = options.height || this.height;
+      this.align = options.align || this.align;
       this.type = options.type || this.type;
       this.compute();
       return this.show();

@@ -33,6 +33,7 @@
 			data: data,
 			width: 400,
 			height: 400,
+			align: "start",
 			// type: "vertical_bar"
 			type: "horizontal_bar"
 		})
@@ -40,17 +41,24 @@
 		view = g.build()
 
 
-		// Timer.after(function() {
-		// 	g.update({
-		// 		type: "vertical_bar"
-		// 	})
-		// }, 80)
 		Timer.after(function() {
-			data[3].value += 100
 			g.update({
-				data: data
+				type: "vertical_bar"
 			})
 		}, 80)
+
+		// Timer.after(function() {
+		// 	g.update({
+		// 		align: "middle"
+		// 	})
+		// }, 80)
+
+		// Timer.after(function() {
+		// 	data[3].value += 100
+		// 	g.update({
+		// 		data: data
+		// 	})
+		// }, 80)
 
 		mainContext.add(view)
 	})
