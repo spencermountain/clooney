@@ -7,24 +7,50 @@
 		var Transitionable = require('famous/transitions/Transitionable');
 		var Easing = require('famous/transitions/Easing');
 		var Timer = require('famous/utilities/Timer');
+		var ToggleButton = require('famous/widgets/ToggleButton');
+		var SequentialLayout = require("famous/views/SequentialLayout");
 		var mainContext = Engine.createContext();
 
-		var surf = new Surface({
-			size: [500, 100],
-			content: "clooney is make moving",
-			properties: {
-				backgroundColor: 'steelblue',
-				"border-radius": "2px",
-				"font-size": "50px",
-				"text-align": "left",
-				"color": "white"
-			},
-		});
-		var rotate = new Modifier({
-			origin: [0.5, 0.5],
-			opacity: 0.75,
-			transform: Transform.rotateZ(1)
-		});
-		mainContext.add(rotate).add(surf)
+		random_data = function() {
+			var arr, i, length;
+			arr = [];
+			length = (Math.random() * 35) + 15;
+			i = 0;
+			while (i < length) {
+				arr.push({
+					value: parseInt(Math.random() * 100) + 1,
+					label: ""
+				});
+				i++;
+			}
+			return arr;
+		};
 
+
+		var Clooney = require('./src/coffeejs/clooney');
+		data = random_data()
+		window.g = new Clooney({
+			data: data,
+			width: 400,
+			height: 400,
+			// type: "vertical_bar"
+			type: "horizontal_bar"
+		})
+		console.log(g)
+		view = g.build()
+
+
+		// Timer.after(function() {
+		// 	g.update({
+		// 		type: "vertical_bar"
+		// 	})
+		// }, 80)
+		Timer.after(function() {
+			data[3].value += 100
+			g.update({
+				data: data
+			})
+		}, 80)
+
+		mainContext.add(view)
 	})
