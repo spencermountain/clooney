@@ -62,7 +62,139 @@
 			hidden: false
 		})
 		console.log(g)
-		view = g.build()
+		graph_view = g.build()
+
+
+		////toools
+		////
+
+		button = function(str, obj, method) {
+			var s = new Surface({
+				size: [100, 20],
+				content: str,
+				properties: {
+					color: "steelblue",
+					cursor: "pointer",
+					border: "1px solid lightsteelblue"
+				}
+			})
+			s.on('click', function() {
+				g.update(obj)
+				if (method) {
+					g[method]()
+				}
+			})
+			return s
+		}
+
+		align = function() {
+			var v = new SequentialLayout({
+				direction: 1,
+				properties: {
+					border: "1px solid steelblue"
+				}
+			})
+			title = new Surface({
+				size: [150, 20],
+				content: "align:",
+				properties: {
+					color: "grey"
+				}
+			})
+			start = button('start', {
+				align: "start"
+			})
+			middle = button('middle', {
+				align: "middle"
+			})
+			end = button('end', {
+				align: "end"
+			})
+			var arr = [title, start, middle, end]
+			v.sequenceFrom(arr)
+			return v
+		}
+		type = function() {
+			var v = new SequentialLayout({
+				direction: 1,
+			})
+			title = new Surface({
+				size: [150, 20],
+				content: "type:",
+				properties: {
+					color: "grey"
+				}
+			})
+			horizontal = button('horizontal_bar', {
+				type: "horizontal_bar"
+			})
+			vertical = button('vertical_bar', {
+				type: "vertical_bar"
+			})
+			var arr = [title, vertical, horizontal]
+			v.sequenceFrom(arr)
+			return v
+		}
+
+		events = function() {
+			var v = new SequentialLayout({
+				direction: 1,
+			})
+			title = new Surface({
+				size: [150, 20],
+				content: "events:",
+				properties: {
+					color: "grey"
+				}
+			})
+			sort = button('sort', {}, 'sort')
+			random = button('randomize', {}, 'randomize')
+			wave = button('wave', {}, 'wave')
+			walk = button('random_walk', {}, 'random_walk')
+			append = button('append', {})
+			append.on('click', function() {
+				g.put({
+					value: parseInt(Math.random() * 95)
+				})
+			})
+			var arr = [title, sort, random, wave, walk, append]
+			v.sequenceFrom(arr)
+			return v
+		}
+		showhide = function() {
+			var v = new SequentialLayout({
+				direction: 1,
+			})
+			title = new Surface({
+				size: [150, 20],
+				content: "show/hide:",
+				properties: {
+					color: "grey"
+				}
+			})
+			show = button('show', {}, 'show')
+			hide = button('hide', {}, 'hide')
+			var arr = [title, show, hide]
+			v.sequenceFrom(arr)
+			return v
+		}
+
+		control_view = function() {
+			hor = new SequentialLayout({
+				direction: 0
+			})
+			var facets = [type(), align(), events(), showhide()]
+			hor.sequenceFrom(facets)
+			return hor
+		}
+
+
+		vert = new SequentialLayout({
+			direction: 1
+		})
+		var arr = [control_view(), graph_view]
+		vert.sequenceFrom(arr)
+
 		// g.random_walk()
 
 
@@ -97,5 +229,5 @@
 		// 	})
 		// }, 80)
 
-		mainContext.add(view)
+		mainContext.add(vert)
 	})

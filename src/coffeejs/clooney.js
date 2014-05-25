@@ -310,9 +310,10 @@ define(function(require, exports, module) {
 
     Graph.prototype.update_order = function() {
       return this.bars.forEach(function(b, l) {
-        return Timer.after(function() {
+        Timer.after(function() {
           return b.sort_to(l);
         }, l * 1.5);
+        return data[l] = b.d;
       });
     };
 
@@ -331,7 +332,7 @@ define(function(require, exports, module) {
 
     Graph.prototype.randomize = function() {
       return this.sort(function() {
-        return Math.random();
+        return Math.round(Math.random());
       });
     };
 

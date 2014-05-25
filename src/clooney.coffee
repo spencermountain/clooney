@@ -97,6 +97,8 @@ define (require, exports, module)->
       the.mod.setOrigin(the.origin, transition)
       the.mod.setTransform(Transform.translate(the.x, the.y), transition)
       the.mod.setSize([the.w, the.h], transition, cb)
+      # Timer.after(->
+      # ,20)
 
     focus:()->
       @mod.setOpacity(1.0)
@@ -217,6 +219,8 @@ define (require, exports, module)->
         Timer.after(-> #stagger the animation
           b.sort_to(l)
         , l*1.5)
+        data[l]= b.d
+
 
     sort:(fn)->
       if !fn || typeof fn=="string"
@@ -228,7 +232,7 @@ define (require, exports, module)->
       @update_order()
 
     randomize:()->
-      @sort(->Math.random())
+      @sort(->Math.round(Math.random()))
 
     random_walk:()->
       the= this
