@@ -3,7 +3,7 @@
 
 Clooney builds graphs using tons of layout logic from [d3.js](http://d3js.org), and renders them with the [famo.us](http://famo.us) layout engine.
 
-here are some demos:
+here's [the demo](https://rawgit.com/spencermountain/clooney/master/index.html)
 
 * [barchart](https://rawgit.com/spencermountain/famo.us_scratch/master/graphs/index.html)
 * [linechart](https://rawgit.com/spencermountain/famo.us_scratch/master/areabar/index.html)
@@ -83,6 +83,7 @@ g.randomize()//re-arrange randomly
 
 //sugar
 g.wave()//wiggle each value in a sequence
+g.randomize()//change order at random
 g.random_walk()//mindlessly guide things out of order
 ```
 
