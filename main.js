@@ -80,8 +80,8 @@
 
 			var arr, i, length;
 			arr = [];
-			// length = 4;
-			length = (Math.random() * 15) + 7;
+			length = 4;
+			// length = (Math.random() * 15) + 7;
 			i = 0;
 			while (i < length) {
 				var label = adjectives[parseInt(Math.random() * adjectives.length)]
@@ -104,7 +104,8 @@
 			width: 400,
 			height: 400,
 			align: "start",
-			type: "area_bar",
+			type: "treemap",
+			// type: "area_bar",
 			// type: "vertical_bar",
 			// type: "horizontal_bar",
 			hidden: false
@@ -127,7 +128,8 @@
 				}
 			})
 			s.on('click', function() {
-				g.update(obj)
+				if (Object.keys(obj).length > 0)
+					g.update(obj)
 				if (method) {
 					g[method]()
 				}
@@ -182,7 +184,10 @@
 			area = button('area_bar', {
 				type: "area_bar"
 			})
-			var arr = [title, vertical, horizontal, area]
+			treemap = button('treemap', {
+				type: "treemap"
+			})
+			var arr = [title, vertical, horizontal, area, treemap]
 			v.sequenceFrom(arr)
 			return v
 		}
@@ -204,8 +209,9 @@
 			walk = button('random_walk', {}, 'random_walk')
 			append = button('append', {})
 			append.on('click', function() {
-				g.put({
-					value: parseInt(Math.random() * 95)
+				g.append({
+					value: parseInt(Math.random() * 95),
+					color: "rgba(42,111,180,0.7)"
 				})
 			})
 			var arr = [title, sort, random, wave, walk, append]

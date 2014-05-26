@@ -43,6 +43,7 @@ define (require, exports, module)->
    #method to draw individual bars
   class Bar
     constructor: (options={}) ->
+      the= this
       @d= options.d || {value:0, label:""}
       @i= options.i
       @graph= options.graph
@@ -57,6 +58,9 @@ define (require, exports, module)->
           color: "white"
           "font-size": "10px"
       )
+      s.on 'click', ->
+        console.log the.d.value
+
       @mod = new Modifier(
         origin: @origin
         transform: Transform.translate(@x, @y)
@@ -110,6 +114,15 @@ define (require, exports, module)->
           @origin=[0,0.5]
         if @graph.align=="end"
           @origin=[0,0]
+        if @graph.hidden
+          @h=0.1
+
+      else if @graph.type=="treemap"
+        @x= the.d.x
+        @y= the.d.y
+        @h= the.d.dy
+        @w= the.d.dx
+        @origin=[0,0]
         if @graph.hidden
           @h=0.1
 
@@ -205,7 +218,6 @@ define (require, exports, module)->
         sum= the.data.reduce( (h,s)->
           return h+s.value
         , 0)
-        console.log sum
         the.x_scale= new Scale({
           size:[0, the.width],
           range:[0, sum],
@@ -214,10 +226,24 @@ define (require, exports, module)->
           size:[0, the.height],
           range:[0, 100],
           })
+      else if the.type=="treemap"
+        #wrap d3's wicked layout algorithm
+        treemap = d3.layout.treemap().size([400, 400]).sticky(true).value (d)->
+          return d.value
+        obj = {
+          children: the.data
+        }
+        arr = treemap(obj)
+        arr = arr.slice(1, arr.length) #remove pesky top one
+        the.data= arr
+        the.x_scale= {}
+        the.y_scale= {}
+
+
+
       @bars.forEach (bar,i)->
         bar.d= the.data[i]
         bar.compute(i)
-
 
     build:->
       return @node
@@ -227,12 +253,15 @@ define (require, exports, module)->
           bar.draw()
         , i)
 
-    put:(obj={})->
+    append:(obj={})->
       the= this
-      b= new Bar(({graph:g, i:the.bars.length, d:obj}))
-      @data.push(obj)
-      @bars.push(b)
+      obj.value= obj.value||0
+      obj.color= obj.color||"rgba(42,111,180,0.7)"
+      the.data.push(obj)
       @compute()
+      b= new Bar(({graph:g, i:the.bars.length, d:obj}))
+      @bars.push(b)
+      @update()
       @update()
     show:->
       @update({hidden:false})
@@ -278,17 +307,21 @@ define (require, exports, module)->
           bar.sort_to(l, transition)#return
         )
 
-    wave:(amount=1.1)->
+    wave:(amount=1.2)->
+      the= this
       transition= {duration:200}
       @bars.forEach (bar,l) ->
-        bar.d.value= bar.d.value*amount
-        bar.compute()
         Timer.after(-> #stagger the animation
-          bar.draw(transition)
-          bar.d.value= bar.d.value/amount
-          bar.compute()
-          bar.draw(transition)
-        , l*0.8)
+          if the.type=="vertical_bar"|| the.type=="area_bar"
+            bar.mod.setSize [bar.w, bar.h*amount], transition, ->
+              bar.mod.setSize [bar.w, bar.h], transition
+          else if the.type=="treemap"
+            bar.mod.setSize [bar.w*amount, bar.h*amount], transition, ->
+              bar.mod.setSize [bar.w, bar.h], transition
+          else
+            bar.mod.setSize [bar.w*amount, bar.h], transition, ->
+              bar.mod.setSize [bar.w, bar.h], transition
+        , l*1.4)
 
   window.Bar= Bar
   module.exports = Graph;

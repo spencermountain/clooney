@@ -41,10 +41,11 @@ define(function(require, exports, module) {
   };
   Bar = (function() {
     function Bar(options) {
-      var s;
+      var s, the;
       if (options == null) {
         options = {};
       }
+      the = this;
       this.d = options.d || {
         value: 0,
         label: ""
@@ -62,6 +63,9 @@ define(function(require, exports, module) {
           color: "white",
           "font-size": "10px"
         }
+      });
+      s.on('click', function() {
+        return console.log(the.d.value);
       });
       this.mod = new Modifier({
         origin: this.origin,
@@ -129,6 +133,15 @@ define(function(require, exports, module) {
         if (this.graph.align === "end") {
           this.origin = [0, 0];
         }
+        if (this.graph.hidden) {
+          return this.h = 0.1;
+        }
+      } else if (this.graph.type === "treemap") {
+        this.x = the.d.x;
+        this.y = the.d.y;
+        this.h = the.d.dy;
+        this.w = the.d.dx;
+        this.origin = [0, 0];
         if (this.graph.hidden) {
           return this.h = 0.1;
         }
@@ -231,7 +244,7 @@ define(function(require, exports, module) {
     };
 
     Graph.prototype.compute = function() {
-      var max, sum, values;
+      var arr, max, obj, sum, treemap, values;
       the = this;
       values = the.data.map(function(d) {
         return d.value;
@@ -259,7 +272,6 @@ define(function(require, exports, module) {
         sum = the.data.reduce(function(h, s) {
           return h + s.value;
         }, 0);
-        console.log(sum);
         the.x_scale = new Scale({
           size: [0, the.width],
           range: [0, sum]
@@ -268,6 +280,18 @@ define(function(require, exports, module) {
           size: [0, the.height],
           range: [0, 100]
         });
+      } else if (the.type === "treemap") {
+        treemap = d3.layout.treemap().size([400, 400]).sticky(true).value(function(d) {
+          return d.value;
+        });
+        obj = {
+          children: the.data
+        };
+        arr = treemap(obj);
+        arr = arr.slice(1, arr.length);
+        the.data = arr;
+        the.x_scale = {};
+        the.y_scale = {};
       }
       return this.bars.forEach(function(bar, i) {
         bar.d = the.data[i];
@@ -287,20 +311,23 @@ define(function(require, exports, module) {
       });
     };
 
-    Graph.prototype.put = function(obj) {
+    Graph.prototype.append = function(obj) {
       var b;
       if (obj == null) {
         obj = {};
       }
       the = this;
+      obj.value = obj.value || 0;
+      obj.color = obj.color || "rgba(42,111,180,0.7)";
+      the.data.push(obj);
+      this.compute();
       b = new Bar({
         graph: g,
         i: the.bars.length,
         d: obj
       });
-      this.data.push(obj);
       this.bars.push(b);
-      this.compute();
+      this.update();
       return this.update();
     };
 
@@ -393,20 +420,28 @@ define(function(require, exports, module) {
     Graph.prototype.wave = function(amount) {
       var transition;
       if (amount == null) {
-        amount = 1.1;
+        amount = 1.2;
       }
+      the = this;
       transition = {
         duration: 200
       };
       return this.bars.forEach(function(bar, l) {
-        bar.d.value = bar.d.value * amount;
-        bar.compute();
         return Timer.after(function() {
-          bar.draw(transition);
-          bar.d.value = bar.d.value / amount;
-          bar.compute();
-          return bar.draw(transition);
-        }, l * 0.8);
+          if (the.type === "vertical_bar" || the.type === "area_bar") {
+            return bar.mod.setSize([bar.w, bar.h * amount], transition, function() {
+              return bar.mod.setSize([bar.w, bar.h], transition);
+            });
+          } else if (the.type === "treemap") {
+            return bar.mod.setSize([bar.w * amount, bar.h * amount], transition, function() {
+              return bar.mod.setSize([bar.w, bar.h], transition);
+            });
+          } else {
+            return bar.mod.setSize([bar.w * amount, bar.h], transition, function() {
+              return bar.mod.setSize([bar.w, bar.h], transition);
+            });
+          }
+        }, l * 1.4);
       });
     };
 
