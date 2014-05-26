@@ -2,7 +2,7 @@
     "author": "Spencer Kelly <spencerwater@gmail.com> (http://spencermounta.in)",
     "name": "clooney",
     "description": "a graphing library for the famo.us engine",
-    "version": "0.0.1",
+    "version": "0.0.5",
     "repository": {
         "type": "git",
         "url": "git://github.com/spencermountain/clooney.git"

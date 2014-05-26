@@ -1,5 +1,7 @@
 	define(function(require, exports, module) {
 
+		var Clooney = require('./clooney');
+
 		var Engine = require('famous/core/Engine');
 		var Transform = require('famous/core/Transform');
 		var Modifier = require('famous/core/Modifier');
@@ -98,7 +100,6 @@
 		};
 
 
-		var Clooney = require('./src/coffeejs/clooney');
 		data = random_data()
 		window.g = new Clooney({
 			data: data,
@@ -189,7 +190,7 @@
 			treemap = button('treemap', {
 				type: "treemap"
 			})
-			var arr = [title, vertical, horizontal, area, treemap]
+			var arr = [title, area, horizontal, vertical, treemap]
 			v.sequenceFrom(arr)
 			return v
 		}

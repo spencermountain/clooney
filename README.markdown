@@ -1,26 +1,33 @@
 
 ##clooney makes graphs with [famo.us](http://famo.us)
 
-Clooney builds graphs using tons of layout logic from [d3.js](http://d3js.org), and renders them with the [famo.us](http://famo.us) layout engine.
+Clooney builds graphs quickly, and handles updates in a generic way.
 
-here's [the demo](https://rawgit.com/spencermountain/clooney/master/index.html)
+using layout logic from [d3.js](http://d3js.org), it renders them with the [famo.us](http://famo.us) layout engine.
+
+here's [the demo](https://rawgit.com/spencermountain/clooney/demo/index.html)
 
 it's in early development. (May 2014)
+
+it currently using the require.js-way, but i'll reduce this dependency soon.
 
 ## Generic Data format
 ```javascript
 //a generic data format for all graphs
 data= [{
 	  value:30,
-	  label:"Rivest"
+	  label:"Rivest",
+	  color:"steelblue"
 	},
 	{
 	  value:40,
-	  label:"Shamir"
+	  label:"Shamir",
+	  color:"darkred"
 	},
 	{
 	  value:60,
-	  label:"Adleman"
+	  label:"Adleman",
+	  color:"lightsalmon"
   }]
 ```
 ## Generic Graph APi
@@ -33,7 +40,8 @@ graph = new Clooney({
 	type: "horizontal_bar"
 })
 
-view = graph.build() //grab the famo.us container
+//put the graph (a container surface) in your app..
+view = graph.build()
 mainContext.add(view)
 
 //then to update it..
@@ -41,7 +49,7 @@ g.update({
 	align:"middle",
 	type:"vertical_bar"
 })
-//the updates automatically animate in a physics transition
+//they automatically animate with a 'wall' physics transition
 
 //the to hide it..
 g.hide()
@@ -87,7 +95,7 @@ g.random_walk()//mindlessly guide things out of order
 ```
 
 #Direct manipulation
-if you're a badass, you can manipulate the graph manually, aswell.
+if you're a badass, you can manipulate the divs manually, through the graph object aswell.
 ```javascript
 
 g.bars[1].focus()
@@ -95,3 +103,6 @@ g.bars[1].focus()
 g.bars[1].height=800
 g.bars[1].draw()
 ```
+
+## Licence
+[go-fer-it.](http://www.wtfpl.net/txt/copying/)
