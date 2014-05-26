@@ -5,13 +5,9 @@ Clooney builds graphs using tons of layout logic from [d3.js](http://d3js.org), 
 
 here's [the demo](https://rawgit.com/spencermountain/clooney/master/index.html)
 
-* [barchart](https://rawgit.com/spencermountain/famo.us_scratch/master/graphs/index.html)
-* [linechart](https://rawgit.com/spencermountain/famo.us_scratch/master/areabar/index.html)
-* [treemap](https://rawgit.com/spencermountain/famo.us_scratch/master/treemap/index.html)
-
 it's in early development. (May 2014)
 
-## Use
+## Generic Data format
 ```javascript
 //a generic data format for all graphs
 data= [{
@@ -26,6 +22,9 @@ data= [{
 	  value:60,
 	  label:"Adleman"
   }]
+```
+## Generic Graph APi
+```javascript
 //compute the graph
 graph = new Clooney({
 	data: data,
@@ -48,14 +47,14 @@ g.update({
 g.hide()
 ```
 
-## Set things up
+## all options
 ```javascript
 options= {
 	data:[] //objects with a number as 'value'. change any value and it updates intellegently
 	width:400//graph container width (and x-axis scale size)
 	height:400//graph container height (and y-axis scale size)
 	align:"start|middle|end" //start=left for horizontal charts, start=bottom for vertical charts
-	type:"horizontal_bar|vertical_bar|horizontal_area" //the type of chart
+	type:"horizontal_bar|vertical_bar|area_bar|treemap" //the type of chart
 	hidden: true|false //lets you control when it opens/closes
 }
 ```

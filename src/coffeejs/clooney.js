@@ -281,7 +281,7 @@ define(function(require, exports, module) {
           range: [0, 100]
         });
       } else if (the.type === "treemap") {
-        treemap = d3.layout.treemap().size([400, 400]).sticky(true).value(function(d) {
+        treemap = d3.layout.treemap().size([the.width, the.height]).sticky(true).value(function(d) {
           return d.value;
         });
         obj = {
@@ -386,12 +386,21 @@ define(function(require, exports, module) {
     Graph.prototype.sort = function(fn) {
       if (!fn || typeof fn === "string") {
         fn = function(a, b) {
-          return b.d.value - a.d.value;
+          if (b.d.value > a.d.value) {
+            return 1;
+          }
+          if (b.d.value === a.d.value) {
+            return 0;
+          }
+          return -1;
         };
       }
       this.bars = this.bars.sort(fn);
       if (fn === "desc") {
         this.bars = this.bars.reverse();
+      }
+      if (this.type === "area_bar" || this.type === "treemap") {
+        this.compute();
       }
       return this.update_order();
     };

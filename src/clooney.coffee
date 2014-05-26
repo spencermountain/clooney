@@ -228,7 +228,7 @@ define (require, exports, module)->
           })
       else if the.type=="treemap"
         #wrap d3's wicked layout algorithm
-        treemap = d3.layout.treemap().size([400, 400]).sticky(true).value (d)->
+        treemap = d3.layout.treemap().size([the.width, the.height]).sticky(true).value (d)->
           return d.value
         obj = {
           children: the.data
@@ -288,10 +288,17 @@ define (require, exports, module)->
     sort:(fn)->
       if !fn || typeof fn=="string"
         fn= (a, b) ->
-          b.d.value - a.d.value
+          if b.d.value > a.d.value
+            return 1
+          if b.d.value == a.d.value
+            return 0
+          return -1
       @bars = @bars.sort(fn)
       if fn=="desc"
         @bars= @bars.reverse()
+      #some graphs need to be re-computed
+      if @type=="area_bar" || @type=="treemap"
+        @compute()
       @update_order()
 
     randomize:()->

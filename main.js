@@ -9,6 +9,7 @@
 		var Timer = require('famous/utilities/Timer');
 		var ToggleButton = require('famous/widgets/ToggleButton');
 		var SequentialLayout = require("famous/views/SequentialLayout");
+		var Scrollview = require("famous/views/Scrollview")
 		var mainContext = Engine.createContext();
 
 
@@ -80,8 +81,8 @@
 
 			var arr, i, length;
 			arr = [];
-			length = 4;
-			// length = (Math.random() * 15) + 7;
+			// length = 4;
+			length = (Math.random() * 8) + 12;
 			i = 0;
 			while (i < length) {
 				var label = adjectives[parseInt(Math.random() * adjectives.length)]
@@ -101,12 +102,12 @@
 		data = random_data()
 		window.g = new Clooney({
 			data: data,
-			width: 400,
+			width: 600,
 			height: 400,
 			align: "start",
-			type: "treemap",
+			// type: "treemap",
 			// type: "area_bar",
-			// type: "vertical_bar",
+			type: "vertical_bar",
 			// type: "horizontal_bar",
 			hidden: false
 		})
@@ -119,12 +120,13 @@
 
 		button = function(str, obj, method) {
 			var s = new Surface({
-				size: [100, 20],
+				size: [130, 20],
 				content: str,
 				properties: {
 					color: "steelblue",
 					cursor: "pointer",
-					border: "1px solid lightsteelblue"
+					border: "1px solid lightsteelblue",
+					// fontFamily: "Ariel"
 				}
 			})
 			s.on('click', function() {
@@ -146,7 +148,7 @@
 			})
 			title = new Surface({
 				size: [150, 20],
-				content: "align:",
+				content: "Align:",
 				properties: {
 					color: "grey"
 				}
@@ -170,7 +172,7 @@
 			})
 			title = new Surface({
 				size: [150, 20],
-				content: "type:",
+				content: "Type:",
 				properties: {
 					color: "grey"
 				}
@@ -198,13 +200,13 @@
 			})
 			title = new Surface({
 				size: [150, 20],
-				content: "events:",
+				content: "Events:",
 				properties: {
 					color: "grey"
 				}
 			})
 			sort = button('sort', {}, 'sort')
-			random = button('randomize', {}, 'randomize')
+			random = button('randomize_order', {}, 'randomize')
 			wave = button('wave', {}, 'wave')
 			walk = button('random_walk', {}, 'random_walk')
 			append = button('append', {})
@@ -214,7 +216,7 @@
 					color: "rgba(42,111,180,0.7)"
 				})
 			})
-			var arr = [title, sort, random, wave, walk, append]
+			var arr = [title, sort, random, wave, append, walk]
 			v.sequenceFrom(arr)
 			return v
 		}
@@ -224,7 +226,7 @@
 			})
 			title = new Surface({
 				size: [150, 20],
-				content: "show/hide:",
+				content: "Show/hide:",
 				properties: {
 					color: "grey"
 				}
@@ -249,42 +251,33 @@
 		vert = new SequentialLayout({
 			direction: 1
 		})
-		var arr = [control_view(), graph_view]
+		html = "oh yes sir,"
+		html += "<h2><a style='color:steelblue; text-decoration:none;' href='https://github.com/spencermountain/clooney/'>Clooney</a> is a new graph library for famo.us</h2>"
+		html += "<div>you can update different graphs in a generic way. </div>"
+		html += "<div>it uses d3's treemap layout </div>"
+		html += "<div style='font-size:24px;'>check it out on your <a style='color:steelblue; text-decoration:none;' href='https://github.com/spencermountain/clooney/'> github</a> </div>"
+		title = new Surface({
+			size: [700, 180],
+			content: html,
+			properties: {
+				color: "grey",
+				// fontFamily: "Lucida Console"
+			}
+		})
+		doc = new Surface({
+			size: [700, 80],
+			content: "<div>g= new Clooney({data:data, type:'treemap'})</div><div>mainContext.add(g.build())</div>",
+			properties: {
+				color: "grey",
+				fontSize: "22px",
+				fontFamily: "Lucida Console"
+			}
+		})
+		var arr = [title, control_view(), graph_view, doc]
 		vert.sequenceFrom(arr)
 
-		// g.random_walk()
 
-
-		// Timer.after(function() {
-		// console.log('hi')
-		// g.put({
-		// value: Math.random() * 95,
-		// label: "fun"
-		// })
-		// 	g.resize({
-		// 		width: 600,
-		// 		height: 600,
-		// 	})
-		// g.wave()
-		// g.random_walk()
-		// }, 50)
-		// Timer.after(function() {
-		// g.sort(function(a, b) {
-		// 	return Math.random()
-		// })
-		// }, 80)
-		// Timer.after(function() {
-		// 	g.update({
-		// 		align: "middle"
-		// 	})
-		// }, 80)
-
-		// Timer.after(function() {
-		// 	data[3].value += 100
-		// 	g.update({
-		// 		data: data
-		// 	})
-		// }, 80)
-
-		mainContext.add(vert)
+		mainContext.add(new Modifier({
+			origin: [0.2, 0]
+		})).add(vert)
 	})
