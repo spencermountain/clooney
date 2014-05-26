@@ -11,6 +11,50 @@
 		var SequentialLayout = require("famous/views/SequentialLayout");
 		var mainContext = Engine.createContext();
 
+
+		var colourscheme = {
+			browns: function(a) {
+				var b, g, r;
+				if (a == null) {
+					a = 0.8;
+				}
+				r = Math.floor(Math.random() * 100) + 100;
+				g = (Math.floor(Math.random() * 3) + 2) * 25;
+				b = 49;
+				return "rgba(" + r + "," + g + "," + b + "," + a + ")";
+			},
+			reds: function(a) {
+				var b, g, r;
+				if (a == null) {
+					a = 0.8;
+				}
+				r = Math.floor(Math.random() * 100) + 100;
+				g = 44;
+				b = 49;
+				return "rgba(" + r + "," + g + "," + b + "," + a + ")";
+			},
+			blues: function(a) {
+				var b, g, r;
+				if (a == null) {
+					a = 0.8;
+				}
+				r = Math.floor(Math.random() * 50) + 30;
+				g = Math.floor(Math.random() * 30) + 100;
+				b = 180;
+				return "rgba(" + r + "," + g + "," + b + "," + a + ")";
+			},
+			bluebrowns: function(a) {
+				if (a == null) {
+					a = 0.8;
+				}
+				if (Math.round(Math.random())) {
+					return colourscheme.blues(a);
+				} else {
+					return colourscheme.browns(a);
+				}
+			}
+		};
+
 		random_data = function() {
 			var animals = [
 				"toronto",
@@ -33,16 +77,19 @@
 				"plenty",
 				"dogged",
 			]
+
 			var arr, i, length;
 			arr = [];
-			length = (Math.random() * 35) + 15;
+			// length = 4;
+			length = (Math.random() * 15) + 7;
 			i = 0;
 			while (i < length) {
 				var label = adjectives[parseInt(Math.random() * adjectives.length)]
 				label += " " + animals[parseInt(Math.random() * animals.length)]
 				arr.push({
 					value: parseInt(Math.random() * 100) + 1,
-					label: label
+					label: label,
+					color: colourscheme.bluebrowns(0.7)
 				});
 				i++;
 			}
@@ -57,7 +104,8 @@
 			width: 400,
 			height: 400,
 			align: "start",
-			type: "vertical_bar",
+			type: "area_bar",
+			// type: "vertical_bar",
 			// type: "horizontal_bar",
 			hidden: false
 		})
@@ -131,7 +179,10 @@
 			vertical = button('vertical_bar', {
 				type: "vertical_bar"
 			})
-			var arr = [title, vertical, horizontal]
+			area = button('area_bar', {
+				type: "area_bar"
+			})
+			var arr = [title, vertical, horizontal, area]
 			v.sequenceFrom(arr)
 			return v
 		}

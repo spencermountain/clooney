@@ -38,6 +38,8 @@ define (require, exports, module)->
     dampingRatio: 0.8
   };
 
+
+
    #method to draw individual bars
   class Bar
     constructor: (options={}) ->
@@ -59,7 +61,7 @@ define (require, exports, module)->
         origin: @origin
         transform: Transform.translate(@x, @y)
         size: [0.1, 0.1]
-        opacity: 0.8
+        opacity: 0.9
       )
       @graph.node.add(@mod).add(s)
       @mod.setSize [@w, @h], wall_transition
@@ -92,6 +94,25 @@ define (require, exports, module)->
         if @graph.hidden
           @w=0.1
 
+      else if @graph.type=="area_bar"
+        if the.i==0
+          already= 0
+        else
+          already= [0..(the.i-1)].reduce((h,i)->
+            return h+the.graph.data[i].value
+          ,0)
+        @x= @graph.x_scale.linear(already)
+        @w= @graph.x_scale.linear(the.d.value)
+        @y= 0
+        @h= 50
+        @origin=[0,1]
+        if @graph.align=="middle"
+          @origin=[0,0.5]
+        if @graph.align=="end"
+          @origin=[0,0]
+        if @graph.hidden
+          @h=0.1
+
     draw: (transition=wall_transition, cb=->)->
       the= this
       the.mod.setOrigin(the.origin, transition)
@@ -120,7 +141,6 @@ define (require, exports, module)->
       @align= options.align || "start"
       @type= options.type || "vertical_bar"
       @hidden= (options.hidden!=null && options.hidden==true)
-      @compute()
       @node= new ContainerSurface({
         size:[@width, @height],
         properties:{
@@ -129,6 +149,7 @@ define (require, exports, module)->
           "border-radius": "2px",
         }
       })
+      @compute()
       @bars= @data.map (d,i)->
         new Bar({
            graph:the,
@@ -178,7 +199,20 @@ define (require, exports, module)->
           })
         the.y_scale= new Scale({
           size:[0, the.height],
-          range:[0, the.bars.length],
+          range:[0, the.data.length],
+          })
+      else if the.type=="area_bar"
+        sum= the.data.reduce( (h,s)->
+          return h+s.value
+        , 0)
+        console.log sum
+        the.x_scale= new Scale({
+          size:[0, the.width],
+          range:[0, sum],
+          })
+        the.y_scale= new Scale({
+          size:[0, the.height],
+          range:[0, 100],
           })
       @bars.forEach (bar,i)->
         bar.d= the.data[i]
@@ -237,13 +271,12 @@ define (require, exports, module)->
     random_walk:()->
       the= this
       @bars.forEach (bar,l) ->
-        duration= Math.random()*25000+10000
+        duration= Math.random()*2500+1000
         transition= {duration:duration}
         spot= Math.random()*the.bars.length
         bar.sort_to(spot, transition, ->
-          console.log l
-          bar.sort_to(l, transition)
-          )
+          bar.sort_to(l, transition)#return
+        )
 
     wave:(amount=1.1)->
       transition= {duration:200}

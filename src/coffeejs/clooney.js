@@ -67,14 +67,14 @@ define(function(require, exports, module) {
         origin: this.origin,
         transform: Transform.translate(this.x, this.y),
         size: [0.1, 0.1],
-        opacity: 0.8
+        opacity: 0.9
       });
       this.graph.node.add(this.mod).add(s);
       this.mod.setSize([this.w, this.h], wall_transition);
     }
 
     Bar.prototype.compute = function() {
-      var the;
+      var already, the, _i, _ref, _results;
       the = this;
       if (this.graph.type === "vertical_bar") {
         this.y = 0;
@@ -105,6 +105,32 @@ define(function(require, exports, module) {
         }
         if (this.graph.hidden) {
           return this.w = 0.1;
+        }
+      } else if (this.graph.type === "area_bar") {
+        if (the.i === 0) {
+          already = 0;
+        } else {
+          already = (function() {
+            _results = [];
+            for (var _i = 0, _ref = the.i - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; 0 <= _ref ? _i++ : _i--){ _results.push(_i); }
+            return _results;
+          }).apply(this).reduce(function(h, i) {
+            return h + the.graph.data[i].value;
+          }, 0);
+        }
+        this.x = this.graph.x_scale.linear(already);
+        this.w = this.graph.x_scale.linear(the.d.value);
+        this.y = 0;
+        this.h = 50;
+        this.origin = [0, 1];
+        if (this.graph.align === "middle") {
+          this.origin = [0, 0.5];
+        }
+        if (this.graph.align === "end") {
+          this.origin = [0, 0];
+        }
+        if (this.graph.hidden) {
+          return this.h = 0.1;
         }
       }
     };
@@ -158,7 +184,6 @@ define(function(require, exports, module) {
       this.align = options.align || "start";
       this.type = options.type || "vertical_bar";
       this.hidden = options.hidden !== null && options.hidden === true;
-      this.compute();
       this.node = new ContainerSurface({
         size: [this.width, this.height],
         properties: {
@@ -167,6 +192,7 @@ define(function(require, exports, module) {
           "border-radius": "2px"
         }
       });
+      this.compute();
       this.bars = this.data.map(function(d, i) {
         return new Bar({
           graph: the,
@@ -205,7 +231,7 @@ define(function(require, exports, module) {
     };
 
     Graph.prototype.compute = function() {
-      var max, values;
+      var max, sum, values;
       the = this;
       values = the.data.map(function(d) {
         return d.value;
@@ -227,7 +253,20 @@ define(function(require, exports, module) {
         });
         the.y_scale = new Scale({
           size: [0, the.height],
-          range: [0, the.bars.length]
+          range: [0, the.data.length]
+        });
+      } else if (the.type === "area_bar") {
+        sum = the.data.reduce(function(h, s) {
+          return h + s.value;
+        }, 0);
+        console.log(sum);
+        the.x_scale = new Scale({
+          size: [0, the.width],
+          range: [0, sum]
+        });
+        the.y_scale = new Scale({
+          size: [0, the.height],
+          range: [0, 100]
         });
       }
       return this.bars.forEach(function(bar, i) {
@@ -340,13 +379,12 @@ define(function(require, exports, module) {
       the = this;
       return this.bars.forEach(function(bar, l) {
         var duration, spot, transition;
-        duration = Math.random() * 25000 + 10000;
+        duration = Math.random() * 2500 + 1000;
         transition = {
           duration: duration
         };
         spot = Math.random() * the.bars.length;
         return bar.sort_to(spot, transition, function() {
-          console.log(l);
           return bar.sort_to(l, transition);
         });
       });
