@@ -14,13 +14,13 @@ module.exports = function(grunt) {
           'src/scale/coffeejs/scale.js',
           'src/coffeejs/clooney.js',
         ],
-        dest: './demo/clooney.js'
+        dest: './build/clooney.js'
       }
     },
     uglify: {
       do :{
-        src: ['./demo/clooney.js'],
-        dest: './demo/clooney.min.js'
+        src: ['./build/clooney.js'],
+        dest: './build/clooney.min.js'
       }
     }
 
