@@ -6,17 +6,23 @@ Scale = (function() {
     if (obj == null) {
       obj = {};
     }
-    this.size = obj.size || [0, 200];
+    this.size = obj.size || 200;
     this.range = obj.range || [0, 100];
+    if (typeof this.size === "object" && this.size.length) {
+      this.size = this.size[1];
+    }
   }
 
   Scale.prototype.linear = function(num) {
-    var full_range, full_size, range_percentage, the;
+    var normalised_delta, percentage, the;
     the = this;
-    full_range = the.range[1] - the.range[0];
-    range_percentage = num / the.range[1];
-    full_size = the.size[1] - the.size[0];
-    return (range_percentage * full_size) + the.size[0];
+    normalised_delta = the.range[1];
+    if (the.range[0] < 0) {
+      normalised_delta += Math.abs(the.range[0]);
+      num += Math.abs(the.range[0]);
+    }
+    percentage = num / normalised_delta;
+    return percentage * the.size;
   };
 
   return Scale;

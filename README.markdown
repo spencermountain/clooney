@@ -11,6 +11,8 @@ it's in early development. (May 2014)
 
 it currently using the require.js-way, but i'll reduce this dependency soon.
 
+named after george clooney.
+
 ## Generic Data format
 ```javascript
 //a generic data format for all graphs
