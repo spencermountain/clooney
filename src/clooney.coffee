@@ -47,6 +47,7 @@ define (require, exports, module)->
       @d= options.d || {value:0, label:""}
       @i= options.i
       @graph= options.graph
+      @killed=false
       @compute()
       s = new Surface(
         size: [undefined, undefined]
@@ -58,17 +59,48 @@ define (require, exports, module)->
           color: "white"
           "font-size": "10px"
       )
+      s.on 'mouseenter', ->
+        console.log "hi"
+        the.show_label()
+        the.focus()
+
+      s.on 'mouseout', ->
+        the.hide_label()
+        the.unfocus()
+
       s.on 'click', ->
-        console.log the.d.value
+        if the.killed
+          the.unkill_others()
+        else
+          the.kill_others()
 
       @mod = new Modifier(
         origin: @origin
         transform: Transform.translate(@x, @y)
         size: [0.1, 0.1]
-        opacity: 0.9
+        opacity: 0.8
       )
-      @graph.node.add(@mod).add(s)
       @mod.setSize [@w, @h], wall_transition
+      @graph.node.add(@mod).add(s)
+
+      ##label logic
+      @label_mod = new Modifier(
+        origin: @origin
+        transform: Transform.translate(@x, @y)
+        size:[0.1,0.1]
+      )
+      label= new Surface({
+        content:@d.label||'fun yeah'
+        properties:{
+          color:"#5c6056"
+          "z-index":"4"
+          overflow:"hidden"
+          # "text-shadow":"1px 1px grey";
+          # border:"1px solid grey"
+        }
+        })
+      @graph.node.add(@label_mod).add(label)
+
 
     compute:()->
       the= this
@@ -125,17 +157,105 @@ define (require, exports, module)->
         @origin=[0,0]
         if @graph.hidden
           @h=0.1
+      # if the.label_mod
+        # the.label_mod.setOrigin(@origin)
 
     draw: (transition=wall_transition, cb=->)->
       the= this
       the.mod.setOrigin(the.origin, transition)
       the.mod.setTransform(Transform.translate(the.x, the.y), transition)
       the.mod.setSize([the.w, the.h], transition, cb)
+      the.draw_label()
       # Timer.after(->
       # ,20)
 
+    draw_label:->
+      the= this
+      if @graph.type=="vertical_bar"
+        x= @x
+        y= -@h
+        if !@graph.bars[@i+1]
+          x -= 50  #it's at the end
+        if @origin[1]!=1
+          y= -@graph.height/1.5
+      if @graph.type=="horizontal_bar"
+        x= @w
+        y= @y
+        if @origin[0]!=0
+          x= @graph.width/2
+        if x + 100 > the.graph.width
+          x= the.graph.width - 120
+      if @graph.type=="area_bar"
+        x= @x
+        y= @y - 60
+        if @origin[1]==0
+          y= -@graph.width/2
+        if @origin[1]==0.5
+          y= -(@graph.width/2) + 30
+        if !@graph.bars[@i+1]
+          x -= 50  #it's at the end
+      if @graph.type=="treemap"
+        x= @d.dx
+        y= @d.dy
+      @label_mod.setTransform(Transform.translate(x, y), wall_transition)
+
+    hide_label:->
+      if !@killed
+        @label_mod.setSize([0.1,0.1])
+
+    show_label:->
+      if !@killed
+        @label_mod.setSize([100,20])
+
+
     focus:()->
-      @mod.setOpacity(1.0)
+      if !@killed
+        if @graph.type=="vertical_bar" || @graph.type=="area_bar"
+          x= @w
+          y= @h + 3
+        if @graph.type=="horizontal_bar"
+          x= @w + 3
+          y= @h
+        if @graph.type=="treemap"
+          x= @d.dx
+          y= @d.dy
+          @mod.setOpacity(1.0)
+        @mod.setSize [x, y], {duration:100}
+
+    unfocus:()->
+      if !@killed
+        @mod.setSize [@w, @h], {duration:100}
+      @mod.setOpacity(0.8)
+
+    kill:->
+      the= this
+      the.killed= true
+      if @graph.type=="vertical_bar" || @graph.type=="area_bar"
+        the.mod.setSize [the.w, the.h * 0.1], wall_transition
+      if @graph.type=="horizontal_bar"
+        the.mod.setSize [the.w * 0.1, the.h], wall_transition
+      if @graph.type=="treemap"
+        the.mod.setSize [the.w * 0.2, the.h * 0.2], wall_transition
+
+    unkill:->
+      the= this
+      the.killed= false
+      the.draw()
+      Timer.after ->
+        the.hide_label()
+      ,5
+
+    kill_others:->
+      the= this
+      the.graph.bars.forEach (b,i)->
+        b.killed= true
+        if b.i != the.i
+          b.kill()
+
+    unkill_others:->
+      the= this
+      the.graph.bars.forEach (b,i)->
+        b.unkill()
 
     sort_to:(i, transition=sort_transition, cb=->)->
       @i=i
@@ -154,6 +274,7 @@ define (require, exports, module)->
       @align= options.align || "start"
       @type= options.type || "vertical_bar"
       @hidden= (options.hidden!=null && options.hidden==true)
+      @label_size=50
       @node= new ContainerSurface({
         size:[@width, @height],
         properties:{
@@ -202,12 +323,12 @@ define (require, exports, module)->
           range:[0, the.data.length],
           })
         the.y_scale= new Scale({
-          size:[0, the.height],
+          size:[0, the.height - @label_size],
           range:[0, max],
           })
       else if the.type=="horizontal_bar"
         the.x_scale= new Scale({
-          size:[0, the.width],
+          size:[0, the.width - @label_size],
           range:[0, max],
           })
         the.y_scale= new Scale({
@@ -223,7 +344,7 @@ define (require, exports, module)->
           range:[0, sum],
           })
         the.y_scale= new Scale({
-          size:[0, the.height],
+          size:[0, the.height - @label_size],
           range:[0, 100],
           })
       else if the.type=="treemap"

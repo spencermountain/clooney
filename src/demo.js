@@ -252,29 +252,8 @@
 		vert = new SequentialLayout({
 			direction: 1
 		})
-		html = "oh yes sir,"
-		html += "<h2><a style='color:steelblue; text-decoration:none;' href='https://github.com/spencermountain/clooney/'>Clooney</a> is a new graph library for famo.us</h2>"
-		html += "<div>you can update different graphs in a generic way. </div>"
-		html += "<div>it uses d3's treemap layout </div>"
-		html += "<div style='font-size:24px;'>check it out on your <a style='color:steelblue; text-decoration:none;' href='https://github.com/spencermountain/clooney/'> github</a> </div>"
-		title = new Surface({
-			size: [700, 180],
-			content: html,
-			properties: {
-				color: "grey",
-				// fontFamily: "Lucida Console"
-			}
-		})
-		doc = new Surface({
-			size: [700, 80],
-			content: "<div>g= new Clooney({data:data, type:'treemap'})</div><div>mainContext.add(g.build())</div>",
-			properties: {
-				color: "grey",
-				fontSize: "22px",
-				fontFamily: "Lucida Console"
-			}
-		})
-		var arr = [title, control_view(), graph_view, doc]
+
+		var arr = [control_view(), graph_view]
 		vert.sequenceFrom(arr)
 
 

@@ -41,7 +41,7 @@ define(function(require, exports, module) {
   };
   Bar = (function() {
     function Bar(options) {
-      var s, the;
+      var label, s, the;
       if (options == null) {
         options = {};
       }
@@ -52,6 +52,7 @@ define(function(require, exports, module) {
       };
       this.i = options.i;
       this.graph = options.graph;
+      this.killed = false;
       this.compute();
       s = new Surface({
         size: [void 0, void 0],
@@ -64,17 +65,44 @@ define(function(require, exports, module) {
           "font-size": "10px"
         }
       });
+      s.on('mouseenter', function() {
+        console.log("hi");
+        the.show_label();
+        return the.focus();
+      });
+      s.on('mouseout', function() {
+        the.hide_label();
+        return the.unfocus();
+      });
       s.on('click', function() {
-        return console.log(the.d.value);
+        if (the.killed) {
+          return the.unkill_others();
+        } else {
+          return the.kill_others();
+        }
       });
       this.mod = new Modifier({
         origin: this.origin,
         transform: Transform.translate(this.x, this.y),
         size: [0.1, 0.1],
-        opacity: 0.9
+        opacity: 0.8
       });
-      this.graph.node.add(this.mod).add(s);
       this.mod.setSize([this.w, this.h], wall_transition);
+      this.graph.node.add(this.mod).add(s);
+      this.label_mod = new Modifier({
+        origin: this.origin,
+        transform: Transform.translate(this.x, this.y),
+        size: [0.1, 0.1]
+      });
+      label = new Surface({
+        content: this.d.label || 'fun yeah',
+        properties: {
+          color: "#5c6056",
+          "z-index": "4",
+          overflow: "hidden"
+        }
+      });
+      this.graph.node.add(this.label_mod).add(label);
     }
 
     Bar.prototype.compute = function() {
@@ -159,11 +187,138 @@ define(function(require, exports, module) {
       the = this;
       the.mod.setOrigin(the.origin, transition);
       the.mod.setTransform(Transform.translate(the.x, the.y), transition);
-      return the.mod.setSize([the.w, the.h], transition, cb);
+      the.mod.setSize([the.w, the.h], transition, cb);
+      return the.draw_label();
+    };
+
+    Bar.prototype.draw_label = function() {
+      var the, x, y;
+      the = this;
+      if (this.graph.type === "vertical_bar") {
+        x = this.x;
+        y = -this.h;
+        if (!this.graph.bars[this.i + 1]) {
+          x -= 50;
+        }
+        if (this.origin[1] !== 1) {
+          y = -this.graph.height / 1.5;
+        }
+      }
+      if (this.graph.type === "horizontal_bar") {
+        x = this.w;
+        y = this.y;
+        if (this.origin[0] !== 0) {
+          x = this.graph.width / 2;
+        }
+        if (x + 100 > the.graph.width) {
+          x = the.graph.width - 120;
+        }
+      }
+      if (this.graph.type === "area_bar") {
+        x = this.x;
+        y = this.y - 60;
+        if (this.origin[1] === 0) {
+          y = -this.graph.width / 2;
+        }
+        if (this.origin[1] === 0.5) {
+          y = -(this.graph.width / 2) + 30;
+        }
+        if (!this.graph.bars[this.i + 1]) {
+          x -= 50;
+        }
+      }
+      if (this.graph.type === "treemap") {
+        x = this.d.dx;
+        y = this.d.dy;
+      }
+      return this.label_mod.setTransform(Transform.translate(x, y), wall_transition);
+    };
+
+    Bar.prototype.hide_label = function() {
+      if (!this.killed) {
+        return this.label_mod.setSize([0.1, 0.1]);
+      }
+    };
+
+    Bar.prototype.show_label = function() {
+      if (!this.killed) {
+        return this.label_mod.setSize([100, 20]);
+      }
     };
 
     Bar.prototype.focus = function() {
-      return this.mod.setOpacity(1.0);
+      var x, y;
+      if (!this.killed) {
+        if (this.graph.type === "vertical_bar" || this.graph.type === "area_bar") {
+          x = this.w;
+          y = this.h + 3;
+        }
+        if (this.graph.type === "horizontal_bar") {
+          x = this.w + 3;
+          y = this.h;
+        }
+        if (this.graph.type === "treemap") {
+          x = this.d.dx;
+          y = this.d.dy;
+          this.mod.setOpacity(1.0);
+        }
+        return this.mod.setSize([x, y], {
+          duration: 100
+        });
+      }
+    };
+
+    Bar.prototype.unfocus = function() {
+      if (!this.killed) {
+        this.mod.setSize([this.w, this.h], {
+          duration: 100
+        });
+      }
+      return this.mod.setOpacity(0.8);
+    };
+
+    Bar.prototype.kill = function() {
+      var the;
+      the = this;
+      the.killed = true;
+      if (this.graph.type === "vertical_bar" || this.graph.type === "area_bar") {
+        the.mod.setSize([the.w, the.h * 0.1], wall_transition);
+      }
+      if (this.graph.type === "horizontal_bar") {
+        the.mod.setSize([the.w * 0.1, the.h], wall_transition);
+      }
+      if (this.graph.type === "treemap") {
+        return the.mod.setSize([the.w * 0.2, the.h * 0.2], wall_transition);
+      }
+    };
+
+    Bar.prototype.unkill = function() {
+      var the;
+      the = this;
+      the.killed = false;
+      the.draw();
+      return Timer.after(function() {
+        return the.hide_label();
+      }, 5);
+    };
+
+    Bar.prototype.kill_others = function() {
+      var the;
+      the = this;
+      return the.graph.bars.forEach(function(b, i) {
+        b.killed = true;
+        if (b.i !== the.i) {
+          return b.kill();
+        }
+      });
+    };
+
+    Bar.prototype.unkill_others = function() {
+      var the;
+      the = this;
+      return the.graph.bars.forEach(function(b, i) {
+        return b.unkill();
+      });
     };
 
     Bar.prototype.sort_to = function(i, transition, cb) {
@@ -197,6 +352,7 @@ define(function(require, exports, module) {
       this.align = options.align || "start";
       this.type = options.type || "vertical_bar";
       this.hidden = options.hidden !== null && options.hidden === true;
+      this.label_size = 50;
       this.node = new ContainerSurface({
         size: [this.width, this.height],
         properties: {
@@ -256,12 +412,12 @@ define(function(require, exports, module) {
           range: [0, the.data.length]
         });
         the.y_scale = new Scale({
-          size: [0, the.height],
+          size: [0, the.height - this.label_size],
           range: [0, max]
         });
       } else if (the.type === "horizontal_bar") {
         the.x_scale = new Scale({
-          size: [0, the.width],
+          size: [0, the.width - this.label_size],
           range: [0, max]
         });
         the.y_scale = new Scale({
@@ -277,7 +433,7 @@ define(function(require, exports, module) {
           range: [0, sum]
         });
         the.y_scale = new Scale({
-          size: [0, the.height],
+          size: [0, the.height - this.label_size],
           range: [0, 100]
         });
       } else if (the.type === "treemap") {
