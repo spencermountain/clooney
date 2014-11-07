@@ -5,7 +5,7 @@ Clooney builds graphs quickly, and handles updates in a generic way.
 
 using layout logic from [d3.js](http://d3js.org), it renders them with the [famo.us](http://famo.us) layout engine.
 
-###here's [the demo](https://rawgit.com/spencermountain/clooney/master/demo/index.html)
+###here's [the demo](http://cdn.rawgit.com/spencermountain/clooney/master/build/index.html)
 
 [![Demo](https://s3.amazonaws.com/spencermounta.in/portfolio/assets/treemap.gif)](https://rawgit.com/spencermountain/clooney/master/demo/index.html)
 
