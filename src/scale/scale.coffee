@@ -10,5 +10,11 @@ class Scale
     if the.range[0]<0
       normalised_delta+=Math.abs(the.range[0])
       num+=Math.abs(the.range[0])
-    percentage= num / normalised_delta
+    else if the.range[0]>0
+      normalised_delta= the.range[1] - the.range[0]
+    normalised_num= num - the.range[0]
+    percentage= normalised_num / normalised_delta
     return percentage * the.size
+
+# x= new Scale({size:500, range:[0, 2014]})
+# console.log(x.linear(1014))

@@ -114,7 +114,12 @@
 		})
 		console.log(g)
 		graph_view = g.build()
-
+		window.new_data = data.filter(function(d, i) {
+			return i != 4 && i != 2
+		})
+		g.update({
+			data: new_data
+		})
 
 		////toools
 		////

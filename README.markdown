@@ -7,7 +7,8 @@ using layout logic from [d3.js](http://d3js.org), it renders them with the [famo
 
 ###here's [the demo](https://rawgit.com/spencermountain/clooney/master/demo/index.html)
 
-it's in early development. (May 2014)
+[![Demo](https://s3.amazonaws.com/spencermounta.in/portfolio/assets/treemap.gif)](https://rawgit.com/spencermountain/clooney/master/demo/index.html)
+
 
 it currently using the require.js-way, but i'll reduce this dependency soon.
 

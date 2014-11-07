@@ -7,12 +7,10 @@ define (require, exports, module)->
   Transitionable = require("famous/transitions/Transitionable")
   ImageSurface = require("famous/surfaces/ImageSurface")
   Easing = require("famous/transitions/Easing")
-  GridLayout = require("famous/views/GridLayout")
   Scrollview = require("famous/views/Scrollview")
   Timer = require("famous/utilities/Timer")
   RenderNode = require("famous/core/RenderNode")
   EventHandler = require('famous/core/EventHandler')
-  HeaderFooterLayout = require("famous/views/HeaderFooterLayout")
   RenderController = require("famous/views/RenderController");
   SequentialLayout = require("famous/views/SequentialLayout");
   View = require('famous/core/View');
@@ -48,10 +46,9 @@ define (require, exports, module)->
       @i= options.i
       @graph= options.graph
       @killed=false
-      @compute()
-      s = new Surface(
+      @s = new Surface(
         size: [undefined, undefined]
-        content:@d.value||''
+        content:@d.label||@d.value
         properties:
           backgroundColor: @d.color || "steelblue"
           overflow:"hidden",
@@ -59,16 +56,18 @@ define (require, exports, module)->
           color: "white"
           "font-size": "10px"
       )
-      s.on 'mouseenter', ->
-        console.log "hi"
-        the.show_label()
+      @compute()
+      @s.on 'mouseenter', ->
+        if the.graph.show_label
+          the.show_label()
         the.focus()
 
-      s.on 'mouseout', ->
-        the.hide_label()
+      @s.on 'mouseout', ->
+        if the.graph.show_label
+          the.hide_label()
         the.unfocus()
 
-      s.on 'click', ->
+      @s.on 'click', ->
         if the.killed
           the.unkill_others()
         else
@@ -81,7 +80,7 @@ define (require, exports, module)->
         opacity: 0.8
       )
       @mod.setSize [@w, @h], wall_transition
-      @graph.node.add(@mod).add(s)
+      @graph.node.add(@mod).add(@s)
 
       ##label logic
       @label_mod = new Modifier(
@@ -90,7 +89,7 @@ define (require, exports, module)->
         size:[0.1,0.1]
       )
       label= new Surface({
-        content:@d.label||'fun yeah'
+        content:@d.label||''
         properties:{
           color:"#5c6056"
           "z-index":"4"
@@ -109,6 +108,7 @@ define (require, exports, module)->
         @h= @graph.y_scale.linear(the.d.value)
         @x= @graph.x_scale.linear(the.i)
         @w= @graph.x_scale.linear(1) - 1
+        the.s.setProperties({"font-size":"11px", "text-align":"left"})
         @origin=[0,1]
         if @graph.align=="middle"
           @origin=[0,0.5]
@@ -122,6 +122,7 @@ define (require, exports, module)->
         @y= -@graph.y_scale.linear(the.i)
         @h= @graph.y_scale.linear(1) - 1
         @w= @graph.x_scale.linear(the.d.value)
+        the.s.setProperties({"font-size":"11px", "text-align":"left"})
         @origin=[0,1]
         if @graph.align=="middle"
           @origin=[0.5,1]
@@ -142,6 +143,7 @@ define (require, exports, module)->
         @y= 0
         @h= 50
         @origin=[0,1]
+        the.s.setProperties({"font-size":"11px", "text-align":"left"})
         if @graph.align=="middle"
           @origin=[0,0.5]
         if @graph.align=="end"
@@ -154,6 +156,7 @@ define (require, exports, module)->
         @y= the.d.y
         @h= the.d.dy
         @w= the.d.dx
+        the.s.setProperties({"font-size":"20px", "text-align":"center"})
         @origin=[0,0]
         if @graph.hidden
           @h=0.1
@@ -273,6 +276,7 @@ define (require, exports, module)->
       @bars=[]
       @align= options.align || "start"
       @type= options.type || "vertical_bar"
+      @show_labels= options.show_labels || true
       @hidden= (options.hidden!=null && options.hidden==true)
       @label_size=50
       @node= new ContainerSurface({
@@ -292,8 +296,33 @@ define (require, exports, module)->
           })
       @draw()
 
+    reset_data:(new_data=[])->
+      the= this
+      @data= new_data
+      new_labels= {}
+      new_data.forEach (o)->
+        new_labels[o.label]=o.value
+      #kill dead ones
+      the.bars= the.bars.map (b)->
+        if new_labels[b.d.label]==null
+          return null
+        b.d.value= new_labels[b.d.label]
+        delete new_labels[b.d.label]
+        return b
+      the.bars= the.bars.filter (b)-> return b
+      #add new ones
+      Object.keys(new_labels).forEach (l)->
+        # d= new_data.find (o)->o.label==l
+        d= {value:new_labels[l], label:l}
+        b= new Bar(({graph:the.graph, i:the.bars.length, d:d}))
+        the.bars.push(b)
+
+
     update:(options={})->
       options.transition= options.transition || wall_transition
+      if options.data
+        # @reset_data(options.data)
+        @data= options.data
       #do container resizes beforehand
       if options.width || options.height
         if options.width!=undefined
@@ -303,7 +332,7 @@ define (require, exports, module)->
         @node.setSize([@width, @height])#should animate this maybe
       if options.hidden==null
         options.hidden= false
-      @data= options.data || @data
+
       @width = options.width || @width
       @height = options.height || @height
       @align = options.align || @align
@@ -314,6 +343,7 @@ define (require, exports, module)->
 
     compute: ->
       the= this
+
       values= the.data.map (d)->d.value
       max = Math.max.apply(Math, values)
       #set values for vertical barchart

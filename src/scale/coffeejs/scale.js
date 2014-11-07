@@ -14,14 +14,17 @@ Scale = (function() {
   }
 
   Scale.prototype.linear = function(num) {
-    var normalised_delta, percentage, the;
+    var normalised_delta, normalised_num, percentage, the;
     the = this;
     normalised_delta = the.range[1];
     if (the.range[0] < 0) {
       normalised_delta += Math.abs(the.range[0]);
       num += Math.abs(the.range[0]);
+    } else if (the.range[0] > 0) {
+      normalised_delta = the.range[1] - the.range[0];
     }
-    percentage = num / normalised_delta;
+    normalised_num = num - the.range[0];
+    percentage = normalised_num / normalised_delta;
     return percentage * the.size;
   };
 
