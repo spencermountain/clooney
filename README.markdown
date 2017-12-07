@@ -1,11 +1,11 @@
 
-##clooney makes graphs with [famo.us](http://famo.us)
+## clooney makes graphs with [famo.us](http://famo.us)
 
 Clooney builds graphs quickly, and handles updates in a generic way.
 
 using layout logic from [d3.js](http://d3js.org), it renders them with the [famo.us](http://famo.us) layout engine.
 
-###here's [the demo](http://cdn.rawgit.com/spencermountain/clooney/master/build/index.html)
+### here's [the demo](http://cdn.rawgit.com/spencermountain/clooney/master/build/index.html)
 
 [![Demo](https://s3.amazonaws.com/spencermounta.in/portfolio/assets/treemap.gif)](https://rawgit.com/spencermountain/clooney/master/demo/index.html)
 
@@ -70,7 +70,7 @@ options= {
 }
 ```
 
-#Utility methods
+# Utility methods
 they just wrap around 'g.update()', if you wanna use them
 ```javascript
 g= new Clooney()
@@ -97,7 +97,7 @@ g.randomize()//change order at random
 g.random_walk()//mindlessly guide things out of order
 ```
 
-#Direct manipulation
+# Direct manipulation
 if you're a badass, you can manipulate the divs manually, through the graph object aswell.
 ```javascript
 
